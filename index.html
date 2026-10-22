@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kitbull: мой взгляд на мультфильм</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📦</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#f2e9dc; --muted:#cbbfb0;
+  --cardboard:#b98b5e; --ember:#f0b35a; --rose:#e8a0a0;
+  --cold:#141a2b; --dusk:#3d2a31;
+  --warm:0; /* 0 → 1 по мере прокрутки: ночь → тёплый закат */
+  --serif:"Lora",Georgia,"Times New Roman",serif;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; font-family:var(--serif); font-size:1.125rem; line-height:1.75; color:var(--ink);
+  background:color-mix(in srgb,var(--dusk) calc(var(--warm)*100%),var(--cold));
+}
+:focus-visible{outline:2px solid var(--ember);outline-offset:3px}
+h1,h2{margin:0;line-height:1.15;font-weight:700}
+p{margin:0 0 1em}
+.progress{position:fixed;inset:0 0 auto 0;height:3px;background:var(--ember);transform-origin:0 50%;transform:scaleX(0);z-index:20}
+
+/* ---------- Hero ---------- */
+.hero{position:relative;min-height:100svh;display:grid;place-items:center;text-align:center;padding:4rem 1.25rem 3rem;overflow:hidden}
+.hero canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.hero__inner{position:relative;display:grid;justify-items:center;gap:1.25rem}
+.box{width:min(300px,68vw);height:auto;overflow:visible}
+.box .halo{transform-origin:50% 45%;animation:lightOn 2.4s .3s ease-out both, breathe 6s 2.7s ease-in-out infinite}
+.box .beam{animation:lightOn 2.4s .3s ease-out both}
+@keyframes lightOn{from{opacity:0}to{opacity:1}}
+@keyframes breathe{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.07);opacity:.82}}
+.hero h1{font-size:clamp(3.4rem,13vw,8rem);letter-spacing:-.03em;animation:titleIn 1.6s 1.4s ease-out both}
+@keyframes titleIn{from{opacity:0;filter:blur(10px);transform:translateY(10px)}to{opacity:1;filter:none;transform:none}}
+.hero__lead{max-width:34ch;margin:0;color:var(--muted);font-style:italic;animation:titleIn 1.6s 2s ease-out both}
+.facts{display:flex;flex-wrap:wrap;justify-content:center;gap:.5rem 2rem;margin:1rem 0 0;padding:0;animation:titleIn 1.6s 2.5s ease-out both}
+.facts div{display:grid;gap:0}
+.facts dt{font-size:.8rem;color:var(--muted)}
+.facts dd{margin:0;font-weight:600}
+.scroll-hint{position:absolute;bottom:1.25rem;left:50%;translate:-50% 0;color:var(--muted);font-size:.85rem;animation:titleIn 1.6s 3s ease-out both}
+
+/* ---------- Истории ---------- */
+.story{max-width:1040px;margin:0 auto;padding:clamp(3.5rem,9vw,7rem) 1.25rem;display:grid;grid-template-columns:1fr 1fr;gap:clamp(1.5rem,5vw,4rem);align-items:center}
+.story--flip .story__text{order:2}
+.story h2{font-size:clamp(1.8rem,4.2vw,2.8rem);margin-bottom:1rem}
+.story--kitten h2{color:var(--ember)}
+.story--dog h2{color:var(--rose)}
+.story--escape h2{color:var(--ember)}
+.story--cap h2{color:#dcb887}
+.story__text{max-width:52ch}
+.story__text p:last-child{margin-bottom:0}
+
+/* Кадр в виде киноплёнки */
+.frame{margin:0;padding:22px 0;position:relative;background:#0a0e18;border-radius:6px;box-shadow:0 18px 50px rgba(0,0,0,.45),0 0 70px color-mix(in srgb,var(--accent,var(--ember)) 24%,transparent);transition:transform .35s ease,box-shadow .35s ease}
+.frame:hover{transform:rotate(-1deg) scale(1.015)}
+.frame::before,.frame::after{content:"";position:absolute;left:0;right:0;height:10px;
+  background:repeating-linear-gradient(90deg,transparent 0 8px,rgba(242,233,220,.55) 8px 20px,transparent 20px 30px);
+  -webkit-mask:linear-gradient(#000,#000);mask:linear-gradient(#000,#000)}
+.frame::before{top:6px}.frame::after{bottom:6px}
+.frame__media{aspect-ratio:720/334;cursor:zoom-in;background:#101626;display:grid;place-items:center;overflow:hidden}
+.frame video{width:100%;height:100%;object-fit:cover;display:block}
+.frame figcaption{padding:.6rem 1rem 0;font-size:.9rem;font-style:italic;color:var(--muted)}
+.frame__empty{display:none;text-align:center;padding:1rem;font-size:.9rem;color:var(--muted)}
+.frame__empty code{display:block;margin-top:.4rem;color:var(--ember);font-size:.85rem;word-break:break-all}
+.frame.is-empty img{display:none}
+.frame.is-empty .frame__empty{display:block}
+
+
+/* ---------- О мультфильме ---------- */
+.about{max-width:1040px;margin:0 auto;padding:clamp(3.5rem,9vw,6rem) 1.25rem 1rem;display:grid;grid-template-columns:1.25fr 1fr;gap:clamp(1.5rem,5vw,4rem);align-items:start}
+.about h2{font-size:clamp(1.8rem,4.2vw,2.8rem);margin-bottom:1.25rem;color:var(--ember)}
+.about h3{font-size:1.2rem;margin:1.8rem 0 .5rem;color:var(--ink)}
+.about__text{max-width:58ch}
+.about .frame{position:sticky;top:2rem}
+.opinion-intro{max-width:760px;margin:0 auto;padding:clamp(3rem,8vw,5rem) 1.25rem 0;text-align:center}
+.opinion-intro h2{font-size:clamp(2rem,5vw,3.2rem);margin-bottom:1rem}
+.opinion-intro p{color:var(--muted);font-style:italic}
+.spoiler{font-size:.9rem;font-style:italic;color:var(--muted);border-left:3px solid var(--ember);padding-left:.8rem;margin:1.2rem 0}
+@media (max-width:800px){.about{grid-template-columns:1fr}.about .frame{position:static}}
+
+/* Разделитель-цепь */
+.chain{display:block;width:min(420px,80%);height:auto;margin:0 auto;color:var(--rose);opacity:.75}
+
+/* ---------- Злость ---------- */
+.anger{max-width:820px;margin:0 auto;padding:clamp(3rem,8vw,6rem) 1.25rem;text-align:center}
+.anger h2{font-size:clamp(1.8rem,4.2vw,2.8rem);color:var(--rose);margin-bottom:1.25rem}
+.anger p{font-size:clamp(1.25rem,2.6vw,1.65rem);line-height:1.6;font-style:italic;margin:0 auto;max-width:34ch}
+
+/* ---------- Финал ---------- */
+.ending{max-width:1040px;margin:0 auto;padding:clamp(3rem,8vw,6rem) 1.25rem clamp(4rem,9vw,7rem);display:grid;grid-template-columns:1fr 1fr;gap:clamp(1.5rem,5vw,4rem);align-items:center}
+.ending h2{font-size:clamp(1.8rem,4.2vw,2.8rem);color:var(--ember);margin-bottom:1rem}
+.ending h3{margin:1.6rem 0 .6rem;font-size:1.15rem}
+.ending ul{margin:0;padding:0;list-style:none;display:grid;gap:.5rem}
+.ending li{padding-left:1.4rem;position:relative}
+.ending li::before{content:"";position:absolute;left:0;top:.8em;width:.8rem;height:2px;background:var(--ember)}
+
+footer{padding:2rem 1.25rem 3rem;text-align:center;font-size:.85rem;color:var(--muted);border-top:1px solid rgba(242,233,220,.12)}
+footer p{max-width:60ch;margin:0 auto}
+
+@media (max-width:800px){
+  .story,.ending{grid-template-columns:1fr}
+  .story--flip .story__text{order:0}
+  body{font-size:1.05rem}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  html{scroll-behavior:auto}
+}
+
+/* ---------- Красота: фон, зерно, появление, навигация, лайтбокс ---------- */
+.story--kitten,.about,.ending,.story--escape{--accent:var(--ember)}
+.story--dog{--accent:var(--rose)}
+.story--cap{--accent:#dcb887}
+.hero__bg{position:absolute;inset:-6%;width:112%;height:112%;object-fit:cover;filter:blur(5px) saturate(.9);opacity:.42;transform:translate(calc(var(--mx,0)*-14px),calc(var(--my,0)*-14px));transition:transform .4s ease-out}
+.hero::before{content:"";position:absolute;inset:0;z-index:1;background:radial-gradient(ellipse at 50% 45%,transparent 25%,var(--cold) 92%),linear-gradient(transparent 55%,var(--cold))}
+.hero canvas{z-index:1}
+.hero__inner,.scroll-hint{z-index:2}
+.box{transform:translate(calc(var(--mx,0)*10px),calc(var(--my,0)*8px));transition:transform .3s ease-out}
+.scroll-hint::after{content:"";display:block;width:10px;height:10px;margin:.5rem auto 0;border:solid var(--muted);border-width:0 2px 2px 0;transform:rotate(45deg);animation:bob 1.8s ease-in-out infinite}
+@keyframes bob{0%,100%{translate:0 0;opacity:.5}50%{translate:0 6px;opacity:1}}
+.hero h1{background:linear-gradient(180deg,#fff4e0,var(--ember));-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;filter:drop-shadow(0 6px 28px rgba(240,179,90,.28))}
+body::after{content:"";position:fixed;inset:0;z-index:15;pointer-events:none;opacity:.09;mix-blend-mode:overlay;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .9s ease,transform .9s cubic-bezier(.2,.7,.2,1)}
+.reveal.in{opacity:1;transform:none}
+.frame.reveal.in:hover{transform:rotate(-1deg) scale(1.015)}
+.story h2,.about h2,.ending h2,.anger h2,.opinion-intro h2{text-wrap:balance}
+.story h2::after,.about h2::after,.ending h2::after{content:"";display:block;width:56px;height:3px;margin-top:.7rem;border-radius:2px;background:var(--accent,var(--ember));opacity:.8}
+.anger p{text-shadow:0 2px 24px rgba(232,160,160,.25)}
+.dots{position:fixed;right:1.1rem;top:50%;translate:0 -50%;z-index:18;display:grid;gap:.9rem}
+.dots a{width:11px;height:11px;border-radius:50%;border:2px solid var(--muted);opacity:.55;transition:all .3s}
+.dots a:hover{opacity:1;transform:scale(1.3)}
+.dots a.on{background:var(--ember);border-color:var(--ember);opacity:1;transform:scale(1.25)}
+.lb{position:fixed;inset:0;z-index:30;display:grid;place-items:center;padding:1rem;background:rgba(6,9,16,.92);cursor:zoom-out;animation:lightOn .25s ease-out}
+.lb video{max-width:min(1200px,96vw);max-height:88vh;border-radius:6px;box-shadow:0 0 90px rgba(240,179,90,.2)}
+@media (max-width:1100px){.dots{display:none}}
+@media (prefers-reduced-motion:reduce){.reveal{opacity:1!important;transform:none!important}.hero__bg{transform:none}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress" aria-hidden="true"></div>
+<nav class="dots" aria-label="Разделы">
+  <a href="#about" aria-label="О мультфильме" title="О мультфильме"></a>
+  <a href="#kitten" aria-label="Котёнок" title="Котёнок"></a>
+  <a href="#dog" aria-label="Песик" title="Песик"></a>
+  <a href="#cap" aria-label="Игра с крышкой" title="Игра с крышкой"></a>
+  <a href="#anger" aria-label="Злость на хозяина" title="Злость на хозяина"></a>
+  <a href="#escape" aria-label="Побег" title="Побег"></a>
+  <a href="#ending" aria-label="После мультфильма" title="После мультфильма"></a>
+</nav>
+
+<header class="hero">
+  <video class="hero__bg" autoplay muted loop playsinline aria-hidden="true" poster="assets/frames/box.jpg">
+    <source src="assets/frames/box.webm" type="video/webm">
+    <source src="assets/frames/box.mp4" type="video/mp4">
+  </video>
+  <canvas id="dust" aria-hidden="true"></canvas>
+  <div class="hero__inner">
+    <!-- Оригинальная иллюстрация: коробка, из которой льётся тёплый свет -->
+    <svg class="box" viewBox="0 0 320 270" role="img" aria-label="Картонная коробка, из которой льётся тёплый свет">
+      <defs>
+        <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+          <stop offset="0" stop-color="#ffd78a" stop-opacity=".9"/>
+          <stop offset="1" stop-color="#f0b35a" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="beam" x1="0" y1="1" x2="0" y2="0">
+          <stop offset="0" stop-color="#ffd78a" stop-opacity=".75"/>
+          <stop offset="1" stop-color="#ffd78a" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <ellipse class="halo" cx="160" cy="120" rx="155" ry="115" fill="url(#glow)"/>
+      <polygon class="beam" points="95,118 225,118 270,0 50,0" fill="url(#beam)"/>
+      <ellipse cx="160" cy="250" rx="125" ry="12" fill="#000" opacity=".35"/>
+      <polygon points="85,118 235,118 225,76 95,76" fill="#9a6f45"/>
+      <polygon points="70,150 85,118 235,118 250,150" fill="#2a1d15"/>
+      <ellipse cx="160" cy="134" rx="70" ry="10" fill="#ffd78a" opacity=".8"/>
+      <polygon points="70,150 85,118 38,124 28,154" fill="#a9794a"/>
+      <polygon points="250,150 235,118 282,124 292,154" fill="#a9794a"/>
+      <rect x="70" y="150" width="180" height="96" fill="#b98b5e"/>
+      <rect x="70" y="150" width="180" height="10" fill="#9a6f45"/>
+      <rect x="146" y="150" width="28" height="96" fill="#d9bf95" opacity=".65"/>
+      <path d="M70 246h180" stroke="#8a6238" stroke-width="3"/>
+    </svg>
+    <h1>Kitbull</h1>
+    <p class="hero__lead">Мультфильм, после которого мне было очень тяжело. Здесь мои мысли о нём.</p>
+    <dl class="facts">
+      <div><dt>Студия</dt><dd>Pixar SparkShorts</dd></div>
+      <div><dt>Год</dt><dd>2019</dd></div>
+      <div><dt>Режиссёр</dt><dd>Росана Салливан</dd></div>
+      <div><dt>Длительность</dt><dd>около 9 минут</dd></div>
+    </dl>
+  </div>
+  <span class="scroll-hint">Листайте вниз</span>
+</header>
+
+<main>
+  <!-- ===== О мультфильме ===== -->
+  <section class="about" id="about">
+    <div class="about__text">
+      <h2>О мультфильме</h2>
+      <p>Kitbull — короткометражка студии Pixar, которую написала и поставила Росана Салливан. Она идёт около девяти минут, в ней нет ни одного слова: всё понятно по движениям и взглядам героев.</p>
+
+      <h3>Откуда он взялся</h3>
+      <p>Мультфильм вышел в рамках программы Pixar SparkShorts: сотрудникам студии давали примерно полгода и небольшой бюджет, чтобы они сняли свои собственные короткие истории. Kitbull стал третьим фильмом этой программы.</p>
+      <p>Премьера прошла 18 января 2019 года в кинотеатре El Capitan, а в феврале того же года мультфильм выложили на YouTube. Там его посмотрели больше ста миллионов раз.</p>
+      <p>Салливан рассказывала, что начала рисовать маленького чёрного котёнка ещё в 2013 году. В детстве ей самой было трудно сходиться с другими детьми, и поэтому она узнаёт себя в этом герое.</p>
+
+      <h3>О чём история</h3>
+      <p>Действие происходит в Сан-Франциско. За одним из зданий, среди мусорных баков, живёт бездомный чёрный котёнок. Он очень самостоятельный: сам добывает еду, и даже рыбу ему удаётся поймать. Спит он в картонной коробке на куче хлама, обнявшись с плюшевым слоником.</p>
+      <p>Но однажды рядом появляется питбуль, и спокойная жизнь заканчивается. Котёнок боится огромной собаки и сначала отбивается когтями. Постепенно он замечает, что пёс очень одинок, а его хозяин жесток: собака сидит на цепи во дворе и почти не видит ласки.</p>
+      <p>Есть в мультфильме и момент, когда котёнок застревает в куче мусора, а пёс помогает ему выбраться.</p>
+      <p>Когда дождь смывает вещи котёнка, остаётся оранжевая крышка от бутылки, и с неё начинается их первая игра. Котёнок случайно толкает крышку в сторону пса, а тот принимает это за приглашение поиграть. Котёнок пугается резкого движения собаки, но видит, что пёс сидит на цепи и ему очень грустно, и решается с ним поиграть, хотя всё ещё его побаивается. После тяжёлой стычки котёнок всё-таки решается подойти к псу, прижимается к нему и мурлычет. Так начинается их дружба. Позже они вдвоём убегают от жестокого хозяина.</p>
+
+      <h3>Как он сделан</h3>
+      <p>Для Pixar это редкость: мультфильм двумерный, нарисованный вручную в цифровом виде, без бумаги. При этом студия использовала технологии, которые обычно нужны для 3D-фильмов, чтобы движение и глубина кадра выглядели плавнее.</p>
+    </div>
+    <figure class="frame">
+      <div class="frame__media">
+        <video muted loop playsinline preload="metadata" poster="assets/frames/box.jpg" aria-label="Кадр из мультфильма: коробка среди мусорных баков">
+          <source src="assets/frames/box.webm" type="video/webm">
+          <source src="assets/frames/box.mp4" type="video/mp4">
+        </video>
+      </div>
+      <figcaption>Двор за зданием, где живёт котёнок</figcaption>
+    </figure>
+  </section>
+
+  <!-- ===== Моё мнение ===== -->
+  <section class="opinion-intro" id="opinion">
+    <h2>Что я почувствовала</h2>
+    <p>Я смотрела этот мультфильм и расстраивалась всё сильнее. Он очень короткий, но задел меня так, что захотелось написать о нём. Ниже мои мысли о героях и о том, что было тяжелее всего.</p>
+  </section>
+
+  <section class="story story--kitten" id="kitten">
+    <div class="story__text">
+      <h2>Котёнок, застрявший в мусоре</h2>
+      <p>Я очень расстроилась, пока смотрела этот мультфильм. Мне было жалко котёнка: он запуганный и совсем один. Он вздрагивает от каждого шороха и никому не доверяет, и понятно почему: рассчитывать ему не на кого.</p>
+      <p>Тяжелее всего было смотреть, как он застрял в куче мусора. Он маленький, у него не получается выбраться, и ему страшно. Я переживала за него так, будто это происходило по-настоящему. К счастью, рядом оказался песик, который сразу стал ему помогать.</p>
+      <p>Он так старается быть сильным и самостоятельным, что от этого ещё грустнее: маленькому существу приходится справляться со всем в одиночку.</p>
+    </div>
+    <figure class="frame">
+      <div class="frame__media">
+        <video muted loop playsinline preload="metadata" poster="assets/frames/kitten-trash.jpg" aria-label="Кадр из мультфильма: котёнок застрял в мусоре, а пёс ему помогает">
+          <source src="assets/frames/kitten-trash.webm" type="video/webm">
+          <source src="assets/frames/kitten-trash.mp4" type="video/mp4">
+        </video>
+      </div>
+      <figcaption>Котёнок застрял в мусоре, и пёс спешит на помощь</figcaption>
+    </figure>
+  </section>
+
+  <section class="story story--dog story--flip" id="dog">
+    <div class="story__text">
+      <h2>Песик, которого не за что было бить</h2>
+      <p>Собаку мне было жалко не меньше. Это питбуль, и хозяин бил его и издевался над ним. Животные не заслуживают такой участи.</p>
+      <p>Он сидит на цепи, почти не видит добра, и мне было больно смотреть, как он тянется к ласке, которой ему так не хватает.</p>
+      <p>И именно он помогал котёнку выбраться, когда тот застрял в мусоре. Собака, с которой обошлись так жестоко, сама оказалась добрее всех людей вокруг.</p>
+      <p>Питбули не рождаются злыми: какой станет собака, зависит от того, как с ней обращаются.</p>
+    </div>
+    <figure class="frame">
+      <div class="frame__media">
+        <video muted loop playsinline preload="metadata" poster="assets/frames/dog.jpg" aria-label="Кадр из мультфильма: собака-питбуль">
+          <source src="assets/frames/dog.webm" type="video/webm">
+          <source src="assets/frames/dog.mp4" type="video/mp4">
+        </video>
+      </div>
+      <figcaption>Питбуль, которому достались чужая злость и цепь</figcaption>
+    </figure>
+  </section>
+
+  <section class="story story--cap" id="cap">
+    <div class="story__text">
+      <h2>Игра с крышкой от бутылки</h2>
+      <p>Мне очень запомнился момент с крышкой. Котёнок случайно толкнул её в сторону песика, а тот принял это за приглашение поиграть.</p>
+      <p>Котёнок испугался резкого движения собаки. Но потом увидел, что песик сидит на цепи, и ему очень грустно. И тогда котёнок решил с ним поиграть, хотя всё ещё его побаивался.</p>
+      <p>Этот момент меня тронул: страх не помешал ему проявить доброту. Именно с этой игры начинается их дружба.</p>
+    </div>
+    <figure class="frame">
+      <div class="frame__media">
+        <video muted loop playsinline preload="metadata" poster="assets/frames/cap.jpg" aria-label="Кадр из мультфильма: котёнок и собака играют с крышкой от бутылки">
+          <source src="assets/frames/cap.webm" type="video/webm">
+          <source src="assets/frames/cap.mp4" type="video/mp4">
+        </video>
+      </div>
+      <figcaption>Первая игра: крышка от бутылки</figcaption>
+    </figure>
+  </section>
+
+  <!-- Цепь: связь с тем, что пережила собака -->
+  <svg class="chain" viewBox="0 0 420 40" fill="none" stroke="currentColor" stroke-width="4" aria-hidden="true">
+    <rect x="8" y="10" width="56" height="20" rx="10"/>
+    <rect x="52" y="14" width="56" height="12" rx="6"/>
+    <rect x="96" y="10" width="56" height="20" rx="10"/>
+    <rect x="140" y="14" width="56" height="12" rx="6"/>
+    <rect x="184" y="10" width="56" height="20" rx="10"/>
+    <rect x="228" y="14" width="56" height="12" rx="6"/>
+    <rect x="272" y="10" width="56" height="20" rx="10"/>
+    <rect x="316" y="14" width="56" height="12" rx="6"/>
+    <rect x="356" y="10" width="56" height="20" rx="10"/>
+  </svg>
+
+  <section class="anger" id="anger">
+    <h2>Злость на хозяина</h2>
+    <p>Я смотрела на него и злилась до дрожи. Бить того, кто не может ответить, это жестокость, и оправданий ей нет.</p>
+    <p style="margin-top:1.2rem">Собака не может ни уйти, ни пожаловаться. Такие люди не должны держать рядом с собой животных.</p>
+  </section>
+
+  <section class="story story--escape story--flip" id="escape">
+    <div class="story__text">
+      <h2>Побег от живодёра</h2>
+      <p>Я очень сильно волновалась, когда песик и котёнок сбегали от живодёра. Я боялась за них: стоило хозяину оказаться рядом, и всё могло закончиться плохо.</p>
+      <p>Мне хотелось, чтобы у них получилось, и я переживала за каждую секунду. Когда они наконец убежали, я очень обрадовалась.</p>
+      <p>Это самый тревожный момент мультфильма, но для меня и самый радостный: они спаслись вместе, потому что не бросили друг друга.</p>
+    </div>
+    <figure class="frame">
+      <div class="frame__media">
+        <video muted loop playsinline preload="metadata" poster="assets/frames/escape.jpg" aria-label="Кадр из мультфильма: побег котёнка и собаки">
+          <source src="assets/frames/escape.webm" type="video/webm">
+          <source src="assets/frames/escape.mp4" type="video/mp4">
+        </video>
+      </div>
+      <figcaption>Побег</figcaption>
+    </figure>
+  </section>
+
+  <section class="ending" id="ending">
+    <div>
+      <h2>После мультфильма</h2>
+      <p class="spoiler">Дальше я расскажу о финале.</p>
+      <p>К счастью, мультфильм заканчивается лучше, чем начинается: и котёнка, и собаку забирает к себе добрая женщина, а в последних кадрах они вместе играют в парке. Я выдохнула, но осадок остался: героям мультфильма повезло, а настоящим животным везёт не всегда.</p>
+      <p>Kitbull грустный, и мне не стыдно, что я расстроилась. Он напоминает: у каждого животного должен быть дом и тот, кто его защитит.</p>
+      <h3>Что можно сделать</h3>
+      <ul>
+        <li>Взять питомца из приюта, а не с рынка.</li>
+        <li>Помогать приютам кормом, вещами или деньгами.</li>
+        <li>Сообщать о жестоком обращении с животными зоозащитникам или в полицию.</li>
+      </ul>
+    </div>
+    <figure class="frame">
+      <div class="frame__media">
+        <video muted loop playsinline preload="metadata" poster="assets/frames/finale.jpg" aria-label="Финальный кадр мультфильма">
+          <source src="assets/frames/finale.webm" type="video/webm">
+          <source src="assets/frames/finale.mp4" type="video/mp4">
+        </video>
+      </div>
+      <figcaption>Финал</figcaption>
+    </figure>
+  </section>
+</main>
+
+<footer>
+  <p>Личное мнение о мультфильме Kitbull (Pixar SparkShorts, 2019). Кадры принадлежат правообладателям и использованы только для иллюстрации.</p>
+</footer>
+
+<script>
+// Прогресс прокрутки + «потепление» фона от ночи к закату
+const root = document.documentElement, bar = document.getElementById('progress');
+function onScroll(){
+  const h = root.scrollHeight - innerHeight, p = h > 0 ? Math.min(1, scrollY / h) : 0;
+  root.style.setProperty('--warm', Math.min(1, p * 1.15).toFixed(3));
+  bar.style.transform = 'scaleX(' + p + ')';
+}
+addEventListener('scroll', onScroll, {passive:true}); onScroll();
+
+// Видео-кадры играют только когда видны на экране
+const vids=document.querySelectorAll('.frame video');
+const vio=new IntersectionObserver(es=>es.forEach(e=>{
+  if(e.isIntersecting){e.target.play().catch(()=>{})}else{e.target.pause()}
+}),{threshold:.25});
+vids.forEach(v=>vio.observe(v));
+
+// Плавное появление блоков и подсветка точки в навигации
+document.querySelectorAll('.about__text,.opinion-intro,.story__text,.frame,.anger,.ending>div').forEach(el=>el.classList.add('reveal'));
+const rio=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');rio.unobserve(e.target)}}),{threshold:.15});
+document.querySelectorAll('.reveal').forEach(el=>rio.observe(el));
+const links=[...document.querySelectorAll('.dots a')];
+const sio=new IntersectionObserver(es=>es.forEach(e=>{
+  if(e.isIntersecting) links.forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+e.target.id));
+}),{rootMargin:'-45% 0px -45% 0px'});
+links.forEach(a=>{const t=document.querySelector(a.getAttribute('href'));if(t)sio.observe(t)});
+
+// Клик по кадру: показать крупно (закрыть: клик или Esc)
+function closeLb(){const l=document.querySelector('.lb');if(l)l.remove()}
+document.querySelectorAll('.frame__media').forEach(m=>m.addEventListener('click',()=>{
+  const src=m.querySelector('video'); if(!src) return;
+  const lb=document.createElement('div'); lb.className='lb';
+  const v=document.createElement('video'); v.src=src.currentSrc; v.autoplay=true; v.muted=true; v.loop=true; v.playsInline=true; v.controls=true;
+  lb.appendChild(v); lb.addEventListener('click',closeLb); document.body.appendChild(lb);
+}));
+addEventListener('keydown',e=>{if(e.key==='Escape')closeLb()});
+
+// Лёгкий параллакс в шапке
+const hero=document.querySelector('.hero');
+if(!matchMedia('(prefers-reduced-motion: reduce)').matches && matchMedia('(hover:hover)').matches){
+  hero.addEventListener('pointermove',e=>{
+    const r=hero.getBoundingClientRect();
+    hero.style.setProperty('--mx',((e.clientX-r.left)/r.width-.5).toFixed(3));
+    hero.style.setProperty('--my',((e.clientY-r.top)/r.height-.5).toFixed(3));
+  });
+}
+
+// Медленная пыль в свете (в hero)
+const cv = document.getElementById('dust'), cx = cv.getContext('2d');
+const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let W, H, dots = [];
+function resize(){
+  const r = cv.getBoundingClientRect(), d = devicePixelRatio || 1;
+  W = cv.width = r.width * d; H = cv.height = r.height * d;
+  dots = Array.from({length: Math.round(r.width / 18)}, () => ({
+    x: Math.random() * W, y: Math.random() * H,
+    r: (Math.random() * 1.6 + .5) * d, vy: (Math.random() * .25 + .08) * d, vx: (Math.random() - .5) * .15 * d,
+    a: Math.random() * .5 + .15
+  }));
+}
+function draw(){
+  cx.clearRect(0, 0, W, H);
+  for (const p of dots){
+    cx.globalAlpha = p.a; cx.fillStyle = '#f0c27a';
+    cx.beginPath(); cx.arc(p.x, p.y, p.r, 0, 6.283); cx.fill();
+    if (!still){ p.y += p.vy; p.x += p.vx; if (p.y > H) { p.y = -4; p.x = Math.random() * W; } }
+  }
+  if (!still) requestAnimationFrame(draw);
+}
+addEventListener('resize', () => { resize(); if (still) draw(); });
+resize(); draw();
+</script>
+</body>
+</html>
